@@ -99,7 +99,7 @@ chrome.runtime.onInstalled.addListener(function () {
 
 function check_block({ frameId, url }) {
   if (block_everything) {
-    url = chrome.extension.getURL("blocked.html")
+    url = chrome.runtime.getURL("blocked.html")
     return { redirectUrl: url };
   } else {
     return;
