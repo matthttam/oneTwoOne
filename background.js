@@ -74,7 +74,7 @@ function decide_if_blocking(data) {
     block_everything = false;
     return;
   }
-  if (data.location.includes('*') || data.location.includes('@owensboro.kyschools.us')) {
+  if (data.location.includes('*') || data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
     console.log('Device allows wildcard login, not blocking anything.');
     block_everything = false;
   } else if (data.location.includes(data.useremail)) {
