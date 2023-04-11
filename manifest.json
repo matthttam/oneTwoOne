@@ -9,12 +9,27 @@
     "service_worker": "background.js"
   },
   "minimum_chrome_version": "66",
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "blocking",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "storage": {
+    "managed_schema": "schema.json"
+  },
   "permissions": [
     "identity",
     "identity.email",
     "enterprise.deviceAttributes",
-    "<all_urls>",
+    "activeTab",
     "webRequest",
     "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ]
 }
