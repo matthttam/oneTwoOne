@@ -93,20 +93,26 @@ chrome.runtime.onStartup.addListener(function () {
 })
 
 chrome.runtime.onInstalled.addListener(function () {
-  console.log('determine blocking status on install.')
+  console.log('determining blocking status on install.')
   get_data(decide_if_blocking);
 })
 
 function check_block({ frameId, url }) {
   if (block_everything) {
-    url = chrome.extension.getURL("blocked.html")
+    url = chrome.runtime.getURL("blocked.html")
     return { redirectUrl: url };
   } else {
     return;
   }
 }
 
-chrome.webRequest.onBeforeRequest.addListener(check_block, {
-  urls: ["*://*/*"],
-  types: ["main_frame", "sub_frame"]
-}, ["blocking"]);
+/*function sanity() {
+  console.log('working!!!!!')
+}*/
+
+//chrome.webRequest.onBeforeRequest.addListener(sanity, {}, [])
+
+// chrome.webRequest.onBeforeRequest.addListener(check_block, {
+//  urls: ['*://*/*'],
+//  types: ["main_frame", "sub_frame"]
+//}, ["blocking"]);

@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "redirect",
+            "redirect": {
+                "extensionPath": "/blocked.html?test=blah"
+            }
+        },
+        "condition": {
+            "urlFilter": "*://*/*",
+            "resourceTypes": [
+                "main_frame"
+            ]
+        }
+    }
+]
