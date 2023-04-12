@@ -64,26 +64,20 @@ function get_data(callback) {
   });
 }
 
-var block_everything;
-
 function decide_if_blocking(data) {
   console.log(data);
   if (typeof data.location == 'undefined') {
     // unmanaged device
     console.log('couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything')
-    block_everything = false;
     return;
   }
   if (data.location.includes('*') || data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
     console.log('Device allows wildcard login, not blocking anything.');
-    block_everything = false;
   } else if (data.location.includes(data.useremail)) {
     console.log('Device has this user as allowed to login, not blocking anything.');
-    block_everything = false;
   } else {
     console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-    alert('You are not allowed to use this device. Please log out.');
-    block_everything = true;
+    apply_blocking_rules()
   }
 }
 
@@ -97,7 +91,7 @@ chrome.runtime.onInstalled.addListener(function () {
   get_data(decide_if_blocking);
 })
 
-function check_block({ frameId, url }) {
+/*function check_block({ frameId, url }) {
   if (block_everything) {
     apply_blocking_rules()
     //url = chrome.runtime.getURL("blocked.html")
@@ -105,7 +99,7 @@ function check_block({ frameId, url }) {
   } else {
     return;
   }
-}
+}*/
 
 function apply_blocking_rules() {
   //url = chrome.runtime.getURL("blocked.html")
