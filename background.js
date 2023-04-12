@@ -1,6 +1,6 @@
 const blockRuleID = 1
 
-const asPromised = (block) => {
+/*const asPromised = (block) => {
   return new Promise((resolve, reject) => {
     block((...results) => {
       if (chrome.runtime.lastError) {
@@ -10,8 +10,24 @@ const asPromised = (block) => {
       }
     });
   });
-};
+};*/
 
+const convertToPromise = (block) => {
+  return new Promise((resolve, reject) => {
+    try {
+      block((...results) => {
+        resolve(...results);
+      });
+    } catch (error) {
+      reject(error);
+    }
+
+    if (chrome.runtime.lastError) {
+      reject(chrome.runtime.lastError);
+    }
+  });
+};
+/*
 entGetInfo = function (item) {
   return asPromised((callback) => {
     if (typeof chrome.enterprise !== "undefined") {
@@ -22,15 +38,69 @@ entGetInfo = function (item) {
       } else { callback(undefined); }
     } else { callback(undefined); }
   });
+}*/
+entGetInfo = function (item) {
+  return convertToPromise((callback) => {
+    if (chrome.enterprise?.deviceAttributes?.[item]) {
+      chrome.enterprise.deviceAttributes[item](callback);
+    } else {
+      callback(undefined);
+    }
+  });
 }
 
+
 getIden = function () {
-  return asPromised((callback) => {
+  return convertToPromise((callback) => {
     chrome.identity.getProfileUserInfo(callback);
   });
 }
 
-function get_data(callback) {
+async function get_data(callback) {
+  const data_needed = ['location', 'assetid', 'directoryid', 'useremail'];
+  const mypromises = [
+    entGetInfo('getDeviceAnnotatedLocation'), // 0 location
+    entGetInfo('getDeviceAssetId'), // 1 asset id
+    entGetInfo('getDirectoryDeviceId'), // 2 directory api id
+    getIden(), // 3 user email
+  ];
+
+  const results = await Promise.allSettled(mypromises);
+
+  const data = {};
+
+  for (let i = 0; i < results.length; i++) {
+    const value = results[i].status === 'fulfilled' ? results[i].value : null;
+
+    if (value && data_needed.includes(data_needed[i])) {
+      switch (data_needed[i]) {
+        case 'location':
+          data.location = value.toLowerCase().split(',');
+          break;
+        case 'assetid':
+          data.assetid = value;
+          break;
+        case 'directoryid':
+          data.directoryid = value;
+          break;
+        case 'useremail':
+          data.useremail = value.email.toLowerCase();
+          break;
+      }
+    }
+  }
+
+  callback(data);
+}
+
+/*
+getIden = function () {
+  return convertToPromise((callback) => {
+    chrome.identity.getProfileUserInfo(callback);
+  });
+}
+*/
+/*function get_data(callback) {
   data = {};
   data_needed = ['location', 'assetid', 'directoryid', 'useremail'];
   mypromises = [Promise.resolve(false),  // 0 location
@@ -64,7 +134,7 @@ function get_data(callback) {
     }
     callback(data);
   });
-}
+}*/
 
 function checkDeviceAuthorization(data) {
 
