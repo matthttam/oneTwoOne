@@ -208,7 +208,6 @@ function applyBlockingRule() {
         }
       },
       condition: {
-        schemes: ['http', 'https']
       }
     }]
   }, () => { console.log("block rule applied") });
