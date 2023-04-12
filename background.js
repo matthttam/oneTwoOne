@@ -203,15 +203,12 @@ function applyBlockingRule() {
       id: blockRuleID,
       action: {
         type: 'redirect',
-        redirect: { "extensionPath": "/blocked.html" }
+        redirect: {
+          extensionPath: "/blocked.html"
+        }
       },
       condition: {
-        urls: ['<all_urls>'],
-        not: { urlFilter: '*://*.owensboro.kyschools.us/*' },
-        unless: [
-          { urlFilter: 'chrome-extension://*/*' },
-          { urlFilter: '<all_urls>', domains: ['tradition1871.com'] }
-        ]
+        schemes: ['http', 'https']
       }
     }]
   }, () => { console.log("block rule applied") });
