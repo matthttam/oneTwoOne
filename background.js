@@ -70,7 +70,7 @@ async function get_data(callback) {
 }
 
 function checkDeviceAuthorization(data) {
-  removeBlockingRule()
+
 
   if (typeof data.location === 'undefined') {
     // unmanaged device
@@ -108,7 +108,7 @@ chrome.runtime.onInstalled.addListener(function () {
   get_data(checkDeviceAuthorization);
 })
 
-function removeBlockingRule() {
+/*function removeBlockingRule() {
   chrome.declarativeNetRequest.getDynamicRules((rules) => {
     const ruleExists = rules.some((rule) => rule.id === blockRuleID);
     if (ruleExists) {
@@ -121,11 +121,11 @@ function removeBlockingRule() {
       console.log("block rule not found");
     }
   });
-}
+}*/
 
 function applyBlockingRule() {
   //url = chrome.runtime.getURL("blocked.html")
-  chrome.declarativeNetRequest.updateDynamicRules({
+  chrome.declarativeNetRequest.updateSessionRules({
     addRules: [{
       id: blockRuleID,
       priority: 1,
