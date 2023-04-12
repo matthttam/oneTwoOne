@@ -201,6 +201,7 @@ function applyBlockingRule() {
   chrome.declarativeNetRequest.updateDynamicRules({
     addRules: [{
       id: blockRuleID,
+      priority: 1,
       action: {
         type: 'redirect',
         redirect: {
@@ -208,6 +209,10 @@ function applyBlockingRule() {
         }
       },
       condition: {
+        urlFilter: "*://*/*",
+        resourceTypes: [
+          "main_frame"
+        ]
       }
     }]
   }, () => { console.log("block rule applied") });
