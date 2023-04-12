@@ -1,3 +1,5 @@
+const blockRuleID = 1
+
 const asPromised = (block) => {
   return new Promise((resolve, reject) => {
     block((...results) => {
@@ -118,7 +120,7 @@ chrome.runtime.onInstalled.addListener(function () {
 
 function removeBlockingRule() {
   chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: ["block"]
+    removeRuleIds: [blockRuleID]
   }, () => {
     console.log("block rule removed");
   });
@@ -128,7 +130,7 @@ function applyBlockingRule() {
   //url = chrome.runtime.getURL("blocked.html")
   chrome.declarativeNetRequest.updateDynamicRules({
     addRules: [{
-      id: 'block',
+      id: blockRuleID,
       action: {
         type: 'redirect',
         redirect: "/blocked.html"
