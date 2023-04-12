@@ -1,118 +1,146 @@
-const asPromised = (block) => {
+const blockRuleID = 1
+
+const convertToPromise = (block) => {
   return new Promise((resolve, reject) => {
-    block((...results) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.extension.lastError);
-      } else {
+    try {
+      block((...results) => {
         resolve(...results);
-      }
-    });
+      });
+    } catch (error) {
+      reject(error);
+    }
+
+    if (chrome.runtime.lastError) {
+      reject(chrome.runtime.lastError);
+    }
   });
 };
 
-entGetInfo = function (item) {
-  return asPromised((callback) => {
-    if (typeof chrome.enterprise !== "undefined") {
-      if (typeof chrome.enterprise.deviceAttributes !== "undefined") {
-        if (typeof chrome.enterprise.deviceAttributes[item] !== "undefined") {
-          chrome.enterprise.deviceAttributes[item](callback);
-        } else { callback(undefined); }
-      } else { callback(undefined); }
-    } else { callback(undefined); }
+getEnterpriseAttribute = function (item) {
+  return convertToPromise((callback) => {
+    if (chrome.enterprise?.deviceAttributes?.[item]) {
+      chrome.enterprise.deviceAttributes[item](callback);
+    } else {
+      callback(undefined);
+    }
   });
 }
 
-getIden = function () {
-  return asPromised((callback) => {
+getIdentity = function () {
+  return convertToPromise((callback) => {
     chrome.identity.getProfileUserInfo(callback);
   });
 }
 
-function get_data(callback) {
-  data = {};
-  data_needed = ['location', 'assetid', 'directoryid', 'useremail'];
-  mypromises = [Promise.resolve(false),  // 0 location
-  Promise.resolve(false),  // 1 asset id
-  Promise.resolve(false),  // 2 directory api id
-  Promise.resolve(false),  // 3 user email
+async function get_data(callback) {
+  const requiredData = ['location', 'assetid', 'directoryid', 'useremail'];
+  const promises = [
+    getEnterpriseAttribute('getDeviceAnnotatedLocation'), // 0 location
+    getEnterpriseAttribute('getDeviceAssetId'), // 1 asset id
+    getEnterpriseAttribute('getDirectoryDeviceId'), // 2 directory api id
+    getIdentity(), // 3 user email
   ];
-  for (i = 0; i < data_needed.length; i++) {
-    if (data_needed[i] === 'location') {
-      mypromises[0] = entGetInfo('getDeviceAnnotatedLocation');
-    } else if (data_needed[i] === 'assetid') {
-      mypromises[1] = entGetInfo('getDeviceAssetId');
-    } else if (data_needed[i] === 'directoryid') {
-      mypromises[2] = entGetInfo('getDirectoryDeviceId');
-    } else if (data_needed[i] === 'useremail') {
-      mypromises[3] = getIden();
+
+  const results = await Promise.allSettled(promises);
+
+  const data = {};
+
+  for (let i = 0; i < results.length; i++) {
+    const value = results[i].status === 'fulfilled' ? results[i].value : null;
+
+    if (value && requiredData.includes(requiredData[i])) {
+      switch (requiredData[i]) {
+        case 'location':
+          data.location = value.toLowerCase().split(',');
+          break;
+        case 'assetid':
+          data.assetid = value;
+          break;
+        case 'directoryid':
+          data.directoryid = value;
+          break;
+        case 'useremail':
+          data.useremail = value.email.toLowerCase();
+          break;
+      }
     }
   }
-  Promise.all(mypromises).then(function (values) {
-    if (values[0]) {
-      data.location = values[0].toLowerCase().split(',');
-    }
-    if (values[1]) {
-      data.assetid = values[1];
-    }
-    if (values[2]) {
-      data.directoryid = values[2];
-    }
-    if (values[3]) {
-      data.useremail = values[3].email.toLowerCase();
-    }
-    callback(data);
-  });
+
+  callback(data);
 }
 
-var block_everything;
+function checkDeviceAuthorization(data) {
+  removeBlockingRule()
 
-function decide_if_blocking(data) {
-  console.log(data);
-  if (typeof data.location == 'undefined') {
+  if (typeof data.location === 'undefined') {
     // unmanaged device
-    console.log('couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything')
-    block_everything = false;
+    console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
     return;
   }
-  if (data.location.includes('*') || data.location.includes('@owensboro.kyschools.us')) {
+
+  if (data.location.includes('*')) {
     console.log('Device allows wildcard login, not blocking anything.');
-    block_everything = false;
-  } else if (data.location.includes(data.useremail)) {
-    console.log('Device has this user as allowed to login, not blocking anything.');
-    block_everything = false;
-  } else {
-    console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-    alert('You are not allowed to use this device. Please log out.');
-    block_everything = true;
+    return;
   }
+
+  if (data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
+    console.log('Device assigned to a staff member, not blocking anything.');
+    return;
+  }
+
+  if (data.location.includes(data.useremail)) {
+    console.log('Device has this user as allowed to login, not blocking anything.');
+    return;
+  }
+
+  console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
+  applyBlockingRule();
+
 }
 
 chrome.runtime.onStartup.addListener(function () {
   console.log('determining blocking status on startup.')
-  get_data(decide_if_blocking);
+  get_data(checkDeviceAuthorization);
 })
 
 chrome.runtime.onInstalled.addListener(function () {
   console.log('determining blocking status on install.')
-  get_data(decide_if_blocking);
+  get_data(checkDeviceAuthorization);
 })
 
-function check_block({ frameId, url }) {
-  if (block_everything) {
-    url = chrome.runtime.getURL("blocked.html")
-    return { redirectUrl: url };
-  } else {
-    return;
-  }
+function removeBlockingRule() {
+  chrome.declarativeNetRequest.getDynamicRules((rules) => {
+    const ruleExists = rules.some((rule) => rule.id === blockRuleID);
+    if (ruleExists) {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [blockRuleID]
+      }, () => {
+        console.log("block rule removed");
+      });
+    } else {
+      console.log("block rule not found");
+    }
+  });
 }
 
-/*function sanity() {
-  console.log('working!!!!!')
-}*/
-
-//chrome.webRequest.onBeforeRequest.addListener(sanity, {}, [])
-
-// chrome.webRequest.onBeforeRequest.addListener(check_block, {
-//  urls: ['*://*/*'],
-//  types: ["main_frame", "sub_frame"]
-//}, ["blocking"]);
+function applyBlockingRule() {
+  //url = chrome.runtime.getURL("blocked.html")
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: [{
+      id: blockRuleID,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          extensionPath: "/blocked.html"
+        }
+      },
+      condition: {
+        urlFilter: "*://*/*",
+        resourceTypes: [
+          "main_frame"
+        ]
+      }
+    }]
+  }, () => { console.log("block rule applied") });
+}

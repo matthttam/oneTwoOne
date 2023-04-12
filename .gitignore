@@ -133,3 +133,7 @@ _metadata
 
 # Private Keys
 *.pem
+
+# Node
+node_modules
+package-lock.json
