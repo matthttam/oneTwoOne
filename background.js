@@ -77,7 +77,7 @@ function decide_if_blocking(data) {
     console.log('Device has this user as allowed to login, not blocking anything.');
   } else {
     console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-    apply_blocking_rules()
+    apply_blocking_rules();
   }
 }
 
