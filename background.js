@@ -203,7 +203,7 @@ function applyBlockingRule() {
       id: blockRuleID,
       action: {
         type: 'redirect',
-        redirect: "/blocked.html"
+        redirect: { "extensionPath": "/blocked.html" }
       },
       condition: {
         urls: ['<all_urls>'],
