@@ -99,11 +99,33 @@ chrome.runtime.onInstalled.addListener(function () {
 
 function check_block({ frameId, url }) {
   if (block_everything) {
-    url = chrome.runtime.getURL("blocked.html")
-    return { redirectUrl: url };
+    apply_blocking_rules()
+    //url = chrome.runtime.getURL("blocked.html")
+    //return { redirectUrl: url };
   } else {
     return;
   }
+}
+
+function apply_blocking_rules() {
+  //url = chrome.runtime.getURL("blocked.html")
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: [{
+      id: 'block',
+      action: {
+        type: 'redirect',
+        redirect: "/blocked.html"
+      },
+      condition: {
+        urls: ['<all_urls>'],
+        not: { urlFilter: '*://*.owensboro.kyschools.us/*' },
+        unless: [
+          { urlFilter: 'chrome-extension://*/*' },
+          { urlFilter: '<all_urls>', domains: ['tradition1871.com'] }
+        ]
+      }
+    }]
+  });
 }
 
 /*function sanity() {
