@@ -1,17 +1,5 @@
 const blockRuleID = 1
 
-/*const asPromised = (block) => {
-  return new Promise((resolve, reject) => {
-    block((...results) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.extension.lastError);
-      } else {
-        resolve(...results);
-      }
-    });
-  });
-};*/
-
 const convertToPromise = (block) => {
   return new Promise((resolve, reject) => {
     try {
@@ -27,19 +15,8 @@ const convertToPromise = (block) => {
     }
   });
 };
-/*
-entGetInfo = function (item) {
-  return asPromised((callback) => {
-    if (typeof chrome.enterprise !== "undefined") {
-      if (typeof chrome.enterprise.deviceAttributes !== "undefined") {
-        if (typeof chrome.enterprise.deviceAttributes[item] !== "undefined") {
-          chrome.enterprise.deviceAttributes[item](callback);
-        } else { callback(undefined); }
-      } else { callback(undefined); }
-    } else { callback(undefined); }
-  });
-}*/
-entGetInfo = function (item) {
+
+getEnterpriseAttribute = function (item) {
   return convertToPromise((callback) => {
     if (chrome.enterprise?.deviceAttributes?.[item]) {
       chrome.enterprise.deviceAttributes[item](callback);
@@ -49,31 +26,30 @@ entGetInfo = function (item) {
   });
 }
 
-
-getIden = function () {
+getIdentity = function () {
   return convertToPromise((callback) => {
     chrome.identity.getProfileUserInfo(callback);
   });
 }
 
 async function get_data(callback) {
-  const data_needed = ['location', 'assetid', 'directoryid', 'useremail'];
-  const mypromises = [
-    entGetInfo('getDeviceAnnotatedLocation'), // 0 location
-    entGetInfo('getDeviceAssetId'), // 1 asset id
-    entGetInfo('getDirectoryDeviceId'), // 2 directory api id
-    getIden(), // 3 user email
+  const requiredData = ['location', 'assetid', 'directoryid', 'useremail'];
+  const promises = [
+    getEnterpriseAttribute('getDeviceAnnotatedLocation'), // 0 location
+    getEnterpriseAttribute('getDeviceAssetId'), // 1 asset id
+    getEnterpriseAttribute('getDirectoryDeviceId'), // 2 directory api id
+    getIdentity(), // 3 user email
   ];
 
-  const results = await Promise.allSettled(mypromises);
+  const results = await Promise.allSettled(promises);
 
   const data = {};
 
   for (let i = 0; i < results.length; i++) {
     const value = results[i].status === 'fulfilled' ? results[i].value : null;
 
-    if (value && data_needed.includes(data_needed[i])) {
-      switch (data_needed[i]) {
+    if (value && requiredData.includes(requiredData[i])) {
+      switch (requiredData[i]) {
         case 'location':
           data.location = value.toLowerCase().split(',');
           break;
@@ -92,49 +68,6 @@ async function get_data(callback) {
 
   callback(data);
 }
-
-/*
-getIden = function () {
-  return convertToPromise((callback) => {
-    chrome.identity.getProfileUserInfo(callback);
-  });
-}
-*/
-/*function get_data(callback) {
-  data = {};
-  data_needed = ['location', 'assetid', 'directoryid', 'useremail'];
-  mypromises = [Promise.resolve(false),  // 0 location
-  Promise.resolve(false),  // 1 asset id
-  Promise.resolve(false),  // 2 directory api id
-  Promise.resolve(false),  // 3 user email
-  ];
-  for (i = 0; i < data_needed.length; i++) {
-    if (data_needed[i] === 'location') {
-      mypromises[0] = entGetInfo('getDeviceAnnotatedLocation');
-    } else if (data_needed[i] === 'assetid') {
-      mypromises[1] = entGetInfo('getDeviceAssetId');
-    } else if (data_needed[i] === 'directoryid') {
-      mypromises[2] = entGetInfo('getDirectoryDeviceId');
-    } else if (data_needed[i] === 'useremail') {
-      mypromises[3] = getIden();
-    }
-  }
-  Promise.all(mypromises).then(function (values) {
-    if (values[0]) {
-      data.location = values[0].toLowerCase().split(',');
-    }
-    if (values[1]) {
-      data.assetid = values[1];
-    }
-    if (values[2]) {
-      data.directoryid = values[2];
-    }
-    if (values[3]) {
-      data.useremail = values[3].email.toLowerCase();
-    }
-    callback(data);
-  });
-}*/
 
 function checkDeviceAuthorization(data) {
   removeBlockingRule()
@@ -175,21 +108,18 @@ chrome.runtime.onInstalled.addListener(function () {
   get_data(checkDeviceAuthorization);
 })
 
-/*function check_block({ frameId, url }) {
-  if (block_everything) {
-    apply_blocking_rules()
-    //url = chrome.runtime.getURL("blocked.html")
-    //return { redirectUrl: url };
-  } else {
-    return;
-  }
-}*/
-
 function removeBlockingRule() {
-  chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [blockRuleID]
-  }, () => {
-    console.log("block rule removed");
+  chrome.declarativeNetRequest.getDynamicRules((rules) => {
+    const ruleExists = rules.some((rule) => rule.id === blockRuleID);
+    if (ruleExists) {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [blockRuleID]
+      }, () => {
+        console.log("block rule removed");
+      });
+    } else {
+      console.log("block rule not found");
+    }
   });
 }
 
@@ -214,14 +144,3 @@ function applyBlockingRule() {
     }]
   }, () => { console.log("block rule applied") });
 }
-
-/*function sanity() {
-  console.log('working!!!!!')
-}*/
-
-//chrome.webRequest.onBeforeRequest.addListener(sanity, {}, [])
-
-// chrome.webRequest.onBeforeRequest.addListener(check_block, {
-//  urls: ['*://*/*'],
-//  types: ["main_frame", "sub_frame"]
-//}, ["blocking"]);
