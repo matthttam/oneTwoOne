@@ -137,29 +137,26 @@ getIden = function () {
 }*/
 
 function checkDeviceAuthorization(data) {
+  removeBlockingRule()
 
   if (typeof data.location === 'undefined') {
     // unmanaged device
     console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
-    removeBlockingRule()
     return;
   }
 
   if (data.location.includes('*')) {
     console.log('Device allows wildcard login, not blocking anything.');
-    removeBlockingRule()
     return;
   }
 
   if (data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
     console.log('Device assigned to a staff member, not blocking anything.');
-    removeBlockingRule()
     return;
   }
 
   if (data.location.includes(data.useremail)) {
     console.log('Device has this user as allowed to login, not blocking anything.');
-    removeBlockingRule()
     return;
   }
 
