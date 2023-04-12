@@ -64,42 +64,46 @@ function get_data(callback) {
   });
 }
 
-function decide_if_blocking(data) {
-  console.log(data);
+function checkDeviceAuthorization(data) {
+
   if (typeof data.location === 'undefined') {
     // unmanaged device
     console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
+    removeBlockingRule()
     return;
   }
 
   if (data.location.includes('*')) {
     console.log('Device allows wildcard login, not blocking anything.');
+    removeBlockingRule()
     return;
   }
 
   if (data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
     console.log('Device assigned to a staff member, not blocking anything.');
+    removeBlockingRule()
     return;
   }
 
   if (data.location.includes(data.useremail)) {
     console.log('Device has this user as allowed to login, not blocking anything.');
+    removeBlockingRule()
     return;
   }
 
   console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-  apply_blocking_rule();
+  applyBlockingRule();
 
 }
 
 chrome.runtime.onStartup.addListener(function () {
   console.log('determining blocking status on startup.')
-  get_data(decide_if_blocking);
+  get_data(checkDeviceAuthorization);
 })
 
 chrome.runtime.onInstalled.addListener(function () {
   console.log('determining blocking status on install.')
-  get_data(decide_if_blocking);
+  get_data(checkDeviceAuthorization);
 })
 
 /*function check_block({ frameId, url }) {
@@ -112,7 +116,7 @@ chrome.runtime.onInstalled.addListener(function () {
   }
 }*/
 
-function remove_blocking_rule() {
+function removeBlockingRule() {
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: ["block"]
   }, () => {
@@ -120,7 +124,7 @@ function remove_blocking_rule() {
   });
 }
 
-function apply_blocking_rule() {
+function applyBlockingRule() {
   //url = chrome.runtime.getURL("blocked.html")
   chrome.declarativeNetRequest.updateDynamicRules({
     addRules: [{
