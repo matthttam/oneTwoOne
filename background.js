@@ -66,19 +66,30 @@ function get_data(callback) {
 
 function decide_if_blocking(data) {
   console.log(data);
-  if (typeof data.location == 'undefined') {
+  if (typeof data.location === 'undefined') {
     // unmanaged device
-    console.log('couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything')
+    console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
     return;
   }
-  if (data.location.includes('*') || data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
+
+  if (data.location.includes('*')) {
     console.log('Device allows wildcard login, not blocking anything.');
-  } else if (data.location.includes(data.useremail)) {
-    console.log('Device has this user as allowed to login, not blocking anything.');
-  } else {
-    console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-    apply_blocking_rules();
+    return;
   }
+
+  if (data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
+    console.log('Device assigned to a staff member, not blocking anything.');
+    return;
+  }
+
+  if (data.location.includes(data.useremail)) {
+    console.log('Device has this user as allowed to login, not blocking anything.');
+    return;
+  }
+
+  console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
+  apply_blocking_rule();
+
 }
 
 chrome.runtime.onStartup.addListener(function () {
@@ -101,7 +112,15 @@ chrome.runtime.onInstalled.addListener(function () {
   }
 }*/
 
-function apply_blocking_rules() {
+function remove_blocking_rule() {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: ["block"]
+  }, () => {
+    console.log("block rule removed");
+  });
+}
+
+function apply_blocking_rule() {
   //url = chrome.runtime.getURL("blocked.html")
   chrome.declarativeNetRequest.updateDynamicRules({
     addRules: [{
@@ -119,7 +138,7 @@ function apply_blocking_rules() {
         ]
       }
     }]
-  });
+  }, () => { console.log("block rule applied") });
 }
 
 /*function sanity() {
