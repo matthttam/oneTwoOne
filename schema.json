@@ -1,9 +1,7 @@
 {
     "type": "object",
     "properties": {
-        "Server": {
-            "title": "Test Server",
-            "description": "Testing something",
+        "DefaultServiceUrl": {
             "type": "string"
         }
     }
