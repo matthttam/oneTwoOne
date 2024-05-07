@@ -1,11 +1,8 @@
 {
     "type": "object",
     "properties": {
-        "AllowAll": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+        "Server": {
+            "type": "string"
         }
     }
 }
