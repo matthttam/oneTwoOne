@@ -9,14 +9,16 @@
     "service_worker": "background.js"
   },
   "minimum_chrome_version": "66",
+  "storage": {
+    "managed_schema": "schema.json"
+  },
   "permissions": [
     "identity",
     "identity.email",
     "enterprise.deviceAttributes",
     "activeTab",
     "webRequest",
-    "declarativeNetRequestWithHostAccess",
-    "storage"
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "*://*/*"
