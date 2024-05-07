@@ -18,7 +18,8 @@
     "enterprise.deviceAttributes",
     "activeTab",
     "webRequest",
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequestWithHostAccess",
+    "storage"
   ],
   "host_permissions": [
     "*://*/*"
