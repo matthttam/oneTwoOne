@@ -124,7 +124,6 @@ chrome.runtime.onInstalled.addListener(function () {
 }*/
 
 function applyBlockingRule() {
-  //url = chrome.runtime.getURL("blocked.html")
   chrome.declarativeNetRequest.updateSessionRules({
     addRules: [{
       id: blockRuleID,
