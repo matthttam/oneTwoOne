@@ -108,20 +108,15 @@ chrome.runtime.onInstalled.addListener(function () {
   get_data(checkDeviceAuthorization);
 })
 
-/*function removeBlockingRule() {
-  chrome.declarativeNetRequest.getDynamicRules((rules) => {
-    const ruleExists = rules.some((rule) => rule.id === blockRuleID);
-    if (ruleExists) {
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [blockRuleID]
-      }, () => {
-        console.log("block rule removed");
-      });
-    } else {
-      console.log("block rule not found");
-    }
-  });
-}*/
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  console.log('policy change detected')
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+    console.log(
+      `Storage key "${key}" in namespace "${namespace}" changed.`,
+      `Old value was "${oldValue}", new value is "${newValue}".`
+    );
+  }
+})
 
 function applyBlockingRule() {
   chrome.declarativeNetRequest.updateSessionRules({
