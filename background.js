@@ -141,29 +141,26 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
   }
 })
 
-
-
-
 function applyBlockingRule() {
   removeBlockingRule()
-  chrome.declarativeNetRequest.updateSessionRules({
-    addRules: [{
-      id: blockRuleID,
-      priority: 1,
-      action: {
-        type: 'redirect',
-        redirect: {
-          extensionPath: "/blocked.html"
+  getExtensionPolicy("BlockPage").then((BlockPage) => {
+    chrome.declarativeNetRequest.updateSessionRules({
+      addRules: [{
+        id: blockRuleID,
+        priority: 1,
+        action: {
+          type: 'redirect',
+          redirect: BlockPage ? { url: BlockPage } : { extensionPath: "/blocked.html" }
+        },
+        condition: {
+          urlFilter: "*://*/*",
+          resourceTypes: [
+            "main_frame"
+          ]
         }
-      },
-      condition: {
-        urlFilter: "*://*/*",
-        resourceTypes: [
-          "main_frame"
-        ]
-      }
-    }]
-  }, () => { console.log("block rule applied") });
+      }]
+    }, () => { console.log("block rule applied") });
+  })
 }
 
 function removeBlockingRule() {
