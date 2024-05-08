@@ -150,7 +150,7 @@ function applyBlockingRule() {
         priority: 1,
         action: {
           type: 'redirect',
-          redirect: BlockPage ? { url: BlockPage } : { extensionPath: "/blocked.html" }
+          redirect: BlockPage ? { url: BlockPage.BlockPage } : { extensionPath: "/blocked.html" }
         },
         condition: {
           urlFilter: "*://*/*",
