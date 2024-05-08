@@ -84,8 +84,7 @@ async function get_data(callback) {
 }
 
 function checkDeviceAuthorization(data) {
-
-
+  removeBlockingRule()
   if (typeof data.location === 'undefined') {
     // unmanaged device
     console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
@@ -146,6 +145,7 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
 
 
 function applyBlockingRule() {
+  removeBlockingRule()
   chrome.declarativeNetRequest.updateSessionRules({
     addRules: [{
       id: blockRuleID,
@@ -164,4 +164,19 @@ function applyBlockingRule() {
       }
     }]
   }, () => { console.log("block rule applied") });
+}
+
+function removeBlockingRule() {
+  chrome.declarativeNetRequest.getDynamicRules((rules) => {
+    const ruleExists = rules.some((rule) => rule.id === blockRuleID);
+    if (ruleExists) {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [blockRuleID]
+      }, () => {
+        console.log("block rule removed");
+      });
+    } else {
+      console.log("block rule not found");
+    }
+  });
 }
