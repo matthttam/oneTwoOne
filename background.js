@@ -167,10 +167,10 @@ function applyBlockingRule() {
 }
 
 function removeBlockingRule() {
-  chrome.declarativeNetRequest.getDynamicRules((rules) => {
+  chrome.declarativeNetRequest.getSessionRules((rules) => {
     const ruleExists = rules.some((rule) => rule.id === blockRuleID);
     if (ruleExists) {
-      chrome.declarativeNetRequest.updateDynamicRules({
+      chrome.declarativeNetRequest.updateSessionRules({
         removeRuleIds: [blockRuleID]
       }, () => {
         console.log("block rule removed");
