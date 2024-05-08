@@ -26,6 +26,16 @@ getEnterpriseAttribute = function (item) {
   });
 }
 
+getExtensionPolicy = function (item) {
+  return convertToPromise((callback) => {
+    if (chrome.storage?.managed?.get) {
+      chrome.storage.managed.get(item, callback)
+    } else {
+      callback(undefined);
+    }
+  })
+}
+
 getIdentity = function () {
   return convertToPromise((callback) => {
     chrome.identity.getProfileUserInfo(callback);
@@ -39,6 +49,7 @@ async function get_data(callback) {
     getEnterpriseAttribute('getDeviceAssetId'), // 1 asset id
     getEnterpriseAttribute('getDirectoryDeviceId'), // 2 directory api id
     getIdentity(), // 3 user email
+    getExtensionPolicy('UnblockPatterns'), // 4 Policy UnblockPatterns
   ];
 
   const results = await Promise.allSettled(promises);
@@ -62,6 +73,9 @@ async function get_data(callback) {
         case 'useremail':
           data.useremail = value.email.toLowerCase();
           break;
+        case 'UnblockPatterns':
+          data.UnblockPatterns = value.UnblockPatterns
+          break;
       }
     }
   }
@@ -83,10 +97,21 @@ function checkDeviceAuthorization(data) {
     return;
   }
 
-  if (data.location.some(location => location.endsWith('@owensboro.kyschools.us'))) {
-    console.log('Device assigned to a staff member, not blocking anything.');
-    return;
+  // Check against each regex string from the policy UnblockPatterns
+  if (data.UnblockPatterns.some((rx_str) => {
+    rx = RegExp(rx_str)
+    if (rx.test(location)) {
+      console.log(`Device location matches the Unblock Pattern (${rx}), not blocking anything.`);
+      return true; //Escape some function
+    }
+  })) {
+    return; // If some function returned true
   }
+
+  // if (data.UnblockPatterns.some(rx => RegExp(rx).test(location))) {
+  //   console.log('Device location matches an Unblock Pattern, not blocking anything');
+  //   return;
+  // }
 
   if (data.location.includes(data.useremail)) {
     console.log('Device has this user as allowed to login, not blocking anything.');
@@ -109,6 +134,8 @@ chrome.runtime.onInstalled.addListener(function () {
 })
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
+  console.log('determining blocking status on policy change.')
+  get_data(checkDeviceAuthorization);
   console.log('policy change detected')
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
     console.log(

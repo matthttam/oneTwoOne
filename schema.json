@@ -1,8 +1,14 @@
 {
     "type": "object",
     "properties": {
-        "DefaultServiceUrl": {
+        "BlockPage": {
             "type": "string"
+        },
+        "UnblockPatterns": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         }
     }
 }
