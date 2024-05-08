@@ -4,11 +4,11 @@
   "name": "oneTwoOne Lockdown",
   "short_name": "oneTwoOne",
   "description": "Prevents students from logging into other student Chromebooks.",
-  "version": "2.1.21",
+  "version": "2.1.22",
   "background": {
     "service_worker": "background.js"
   },
-  "minimum_chrome_version": "66",
+  "minimum_chrome_version": "88",
   "storage": {
     "managed_schema": "schema.json"
   },

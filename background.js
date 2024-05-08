@@ -1,3 +1,4 @@
+const customBlockPageRuleID = 2
 const blockRuleID = 1
 
 const convertToPromise = (block) => {
@@ -84,7 +85,7 @@ async function get_data(callback) {
 }
 
 function checkDeviceAuthorization(data) {
-  removeBlockingRule()
+  removeAllCustomRules()
   if (typeof data.location === 'undefined') {
     // unmanaged device
     console.log('Couldn\'t get managed device info. Is this device enrolled in your admin console and device location set? Not blocking anything');
@@ -115,7 +116,7 @@ function checkDeviceAuthorization(data) {
   }
 
   console.log('Device does not have this user as allowed, BLOCKING ALL WEBSITES!');
-  applyBlockingRule();
+  applyBlockingRule(data.location.join("; "));
 
 }
 
@@ -141,39 +142,61 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
   }
 })
 
-function applyBlockingRule() {
-  removeBlockingRule()
+function applyBlockingRule(assigned_user) {
+  removeAllCustomRules()
   getExtensionPolicy("BlockPage").then((BlockPage) => {
-    chrome.declarativeNetRequest.updateSessionRules({
-      addRules: [{
-        id: blockRuleID,
-        priority: 1,
+    rules = []
+    useDefaultBlockPage = (BlockPage.BlockPage === "undefined" || BlockPage.BlockPage === "")
+    redirect = useDefaultBlockPage ? { extensionPath: `/blocked.html?user=${assigned_user}` } : { url: BlockPage.BlockPage }
+    rules.push({
+      id: blockRuleID,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: redirect
+      },
+      condition: {
+        urlFilter: "*://*/*",
+        resourceTypes: [
+          "main_frame"
+        ]
+      }
+    })
+    if (!useDefaultBlockPage) {
+      rules.push({
+        id: customBlockPageRuleID,
+        priority: 2,
         action: {
-          type: 'redirect',
-          redirect: BlockPage ? { url: BlockPage.BlockPage } : { extensionPath: "/blocked.html" }
+          type: 'allow',
         },
         condition: {
-          urlFilter: "*://*/*",
+          urlFilter: redirect.url,
           resourceTypes: [
             "main_frame"
           ]
-        }
-      }]
+        });
+    }
+
+    chrome.declarativeNetRequest.updateSessionRules({
+      addRules: rules
     }, () => { console.log("block rule applied") });
   })
 }
 
-function removeBlockingRule() {
+function removeAllCustomRules() {
+  removeCustomRule(blockRuleID)
+  removeCustomRule(customBlockPageRuleID)
+}
+
+function removeCustomRule(id) {
   chrome.declarativeNetRequest.getSessionRules((rules) => {
-    const ruleExists = rules.some((rule) => rule.id === blockRuleID);
+    const ruleExists = rules.some((rule) => rule.id === id);
     if (ruleExists) {
       chrome.declarativeNetRequest.updateSessionRules({
-        removeRuleIds: [blockRuleID]
+        removeRuleIds: [id]
       }, () => {
         console.log("block rule removed");
       });
-    } else {
-      console.log("block rule not found");
     }
   });
 }
