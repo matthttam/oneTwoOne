@@ -2,9 +2,13 @@
     "type": "object",
     "properties": {
         "BlockPage": {
+            "title": "Block Page URL",
+            "descrption": "Optionally provide a custom URL to load upon block.",
             "type": "string"
         },
         "UnblockPatterns": {
+            "title": "RegExp Unblock Listing",
+            "descrption": "List of regular expressions that unblock if the user matches.",
             "type": "array",
             "items": {
                 "type": "string"

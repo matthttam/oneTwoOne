@@ -125,25 +125,31 @@ function checkDeviceAuthorization(data) {
 
 chrome.runtime.onStartup.addListener(function () {
   console.log('determining blocking status on startup.')
+  addPolicyUpdateListener()
   get_data(checkDeviceAuthorization);
 })
 
 chrome.runtime.onInstalled.addListener(function () {
   console.log('determining blocking status on install.')
+  addPolicyUpdateListener()
   get_data(checkDeviceAuthorization);
 })
 
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-  console.log('determining blocking status on policy change.')
-  get_data(checkDeviceAuthorization);
-  console.log('policy change detected')
-  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(
-      `Storage key "${key}" in namespace "${namespace}" changed.`,
-      `Old value was "${oldValue}", new value is "${newValue}".`
-    );
-  }
-})
+function addPolicyUpdateListener() {
+  chrome.storage.onChanged.addListener(function (changes, areaName) {
+    console.log('determining blocking status on policy change.')
+    get_data(checkDeviceAuthorization);
+    console.log('policy change detected')
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${areaName}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+    }
+  })
+}
+
+
 
 function applyBlockingRule() {
   chrome.declarativeNetRequest.updateSessionRules({
