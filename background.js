@@ -43,7 +43,7 @@ getIdentity = function () {
 }
 
 async function get_data(callback) {
-  const requiredData = ['location', 'assetid', 'directoryid', 'useremail'];
+  const requiredData = ['location', 'assetid', 'directoryid', 'useremail', 'UnblockPatterns'];
   const promises = [
     getEnterpriseAttribute('getDeviceAnnotatedLocation'), // 0 location
     getEnterpriseAttribute('getDeviceAssetId'), // 1 asset id
