@@ -174,7 +174,8 @@ function applyBlockingRule(assigned_user) {
           resourceTypes: [
             "main_frame"
           ]
-        });
+        }
+      });
     }
 
     chrome.declarativeNetRequest.updateSessionRules({
