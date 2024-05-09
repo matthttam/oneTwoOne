@@ -6,7 +6,7 @@
   "icons": {
     "128": "lib/media/icons/icon128.png"
   },
-  "version": "3.0.2",
+  "version": "3.0.3",
   "background": {
     "service_worker": "background.js"
   },

@@ -42,6 +42,16 @@ If teachers don't get the extension, they'll be able to login to any device.
 1. Search for OneTwoOne or past the following ID in the View app by ID section ```jnanjcpghahljpllmojibnjehekidnnk```
 1. Click save. Now in the list of extensions change ```jnanjcpghahljpllmojibnjehekidnnk``` from "Allow install" to "Force install". Click save at top right.
 
+To use the hosted version (not recommended):  
+1. admin.google.com > 3 bar menu at top left > Devices > Chrome management > Apps & extensions
+1. Choose student testing OU to the left.
+1. Yellow + circle at bottom right > yellow "grid" icon with tooltip "add Chrome app or extension by ID".
+1. Extension ID: jnanjcpghahljpllmojibnjehekidnnk
+1. Switch dropdown to "From a custom URL"
+1. URL: https://files.tradition1871.com/oneTwoOne/update.xml
+1. Set Update URL to "Installation URL (see above)"
+1. Click save. Now in the list of extensions change jnanjcpghahljpllmojibnjehekidnnk from "Allow install" to "Force install". Click save at top right.
+
 ### Optional Configuration
 Modify the extension configuration under the "Policy for extensions" section in Google Admin. Paste the following json object into that section for the default configuration:
 ```
