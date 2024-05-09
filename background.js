@@ -98,7 +98,7 @@ function checkDeviceAuthorization(data) {
   }
 
   // Check against each regex string from the policy UnblockPatterns
-  if (data.UnblockPatterns.some((rx_str) => {
+  if (data.UnblockPatterns !== undefined && data.UnblockPatterns.some((rx_str) => {
     rx = RegExp(rx_str)
     return data.location.some(location => {
       if (rx.test(location)) {
@@ -146,19 +146,26 @@ function applyBlockingRule(assigned_user) {
   removeAllCustomRules()
   getExtensionPolicy("BlockPage").then((BlockPage) => {
     rules = []
-    useCustomBlockPage = (BlockPage.BlockPage !== "undefined" && BlockPage.BlockPage !== "")
-    redirect = useCustomBlockPage ? { url: BlockPage.BlockPage } : { extensionPath: `/blocked.html?user=${assigned_user}` }
+    // Set default options for redirect
+    redirect = { extensionPath: `/blocked.html?user=${assigned_user}` }
     condition = {
       urlFilter: "*://*/*",
       resourceTypes: [
         "main_frame"
       ]
     }
-    if (useCustomBlockPage) {
+    // If BlockPage custom options are set
+    if (BlockPage.BlockPage !== undefined && BlockPage.BlockPage !== "undefined" && BlockPage.BlockPage !== "") {
+      // Append the user parameter, Redirect to the URL, Add the domain to the exclusion listing
+      BlockPageURL = new URL(BlockPage.BlockPage)
+      BlockPageURL.searchParams.append("user", assigned_user)
+      redirect = { url: BlockPageURL.toString() }
       excludedRequestDomains = []
-      excludedRequestDomains.push((new URL(BlockPage.BlockPage)).hostname)
+      excludedRequestDomains.push(BlockPageURL.hostname)
       condition.excludedRequestDomains = excludedRequestDomains
     }
+
+    // Add the rule
     rules.push({
       id: blockRuleID,
       priority: 1,
@@ -184,7 +191,7 @@ function removeCustomRule(id) {
       chrome.declarativeNetRequest.updateSessionRules({
         removeRuleIds: [id]
       }, () => {
-        console.log("block rule removed");
+        console.log(`block rule ${id} removed`);
       });
     }
   });
