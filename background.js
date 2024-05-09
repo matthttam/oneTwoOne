@@ -147,7 +147,7 @@ function applyBlockingRule(assigned_user) {
   getExtensionPolicy("BlockPage").then((BlockPage) => {
     rules = []
     useCustomBlockPage = (BlockPage.BlockPage !== "undefined" && BlockPage.BlockPage !== "")
-    redirect = useDefaultBlockPage ? { extensionPath: `/blocked.html?user=${assigned_user}` } : { url: BlockPage.BlockPage }
+    redirect = useCustomBlockPage ? { url: BlockPage.BlockPage } : { extensionPath: `/blocked.html?user=${assigned_user}` }
     condition = {
       urlFilter: "*://*/*",
       resourceTypes: [
