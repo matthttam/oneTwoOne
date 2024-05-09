@@ -58,7 +58,7 @@ Modify the extension configuration under the "Policy for extensions" section in 
 If no configuration is provided or the above configuration is used a built-in block page is presented that tells the user who the assigned user is when they are blocked and the user must match the assigned user (location field) or they will be blocked form all pages.
 
 You can customize this behaivor in the following ways:  
-__BlockPage__: Provide a full URL (e.g. _https://www.google.com/search?q=oneTwoOne+Extension_) and the user will be redirected to this webpage. Note they can navivate all of this webpage and subdomains if they choose to do so. A Search Param of user=*assigned user* will be added to the cusotm block page for your use. 
+__BlockPage__: Provide a full URL (e.g. _https://www.google.com/search?q=oneTwoOne+Extension_) and the user will be redirected to this webpage. Note they can navivate all of this webpage and subdomains if they choose to do so. A Search Param of user=*assigned user* will be added to the cusotm block page for your use.  
 __UnblockPatterns__: Provide a list of regular expressions. If the assigned user matches any of these expressions nothing will be blocked. This is useful if you want students to be able to use a staff assigned device.
 
 #### Example
