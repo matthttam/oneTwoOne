@@ -6,6 +6,8 @@ Special thanks to jay0lee for the original application, which served as the basi
 # Deployment Guide
 __WARNING__: We have been using this extension for years now and it works great. This latest version provides configuration options from the Google Admin console that allow customizations regarding some blocking features. This extension will be published as a full Chrome Web Store extension soon and it is recommended to deploy from there instead of from our own repository.
 
+If you want to deploy using our repository or your own use tag 3.0.0 which was the final release before converting to a public chrome extension.
+
 ### Populate the location attribute of Chrome devices with comma separated list of allowed user logins.
 
 A few examples:
@@ -36,10 +38,8 @@ __WARNING__: It is recommended to install this extension from the Chrome Web Sto
 If teachers don't get the extension, they'll be able to login to any device.
 1. admin.google.com > 3 bar menu at top left > Devices > Chrome management > Apps & extensions
 1. Choose student testing OU to the left.
-1. Yellow + circle at bottom right > yellow "grid" icon with tooltip "add Chrome app or extension by ID".
-1. Extension ID: ```jnanjcpghahljpllmojibnjehekidnnk```
-1. Switch dropdown to "From a custom URL"
-1. URL: ```https://files.tradition1871.com/oneTwoOne/update.xml```
+1. Yellow + circle at bottom right > yellow "chrome" icon with tooltip "Add from Chrome Web Store".
+1. Search for OneTwoOne or past the following ID in the View app by ID section ```jnanjcpghahljpllmojibnjehekidnnk```
 1. Click save. Now in the list of extensions change ```jnanjcpghahljpllmojibnjehekidnnk``` from "Allow install" to "Force install". Click save at top right.
 
 ### Optional Configuration
@@ -55,7 +55,7 @@ Modify the extension configuration under the "Policy for extensions" section in 
     }
 }
 ```
-If no configuration is provided or the above configuration is used a built-in block page is presented that tells the user who the assigned user is when they are blocked and the user must match the assigned user (location field) or they will be blocked form all pages.
+If no configuration is provided or the above configuration is used, a built-in block page is presented that tells the user who the assigned user is and the user must match the assigned user (location field) or they will be blocked form all pages.
 
 You can customize this behaivor in the following ways:  
 __BlockPage__: Provide a full URL (e.g. _https://www.google.com/search?q=oneTwoOne+Extension_) and the user will be redirected to this webpage. Note they can navivate all of this webpage and subdomains if they choose to do so. A Search Param of user=*assigned user* will be added to the cusotm block page for your use.  
