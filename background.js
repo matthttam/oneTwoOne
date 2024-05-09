@@ -146,8 +146,17 @@ function applyBlockingRule(assigned_user) {
   removeAllCustomRules()
   getExtensionPolicy("BlockPage").then((BlockPage) => {
     rules = []
-    useDefaultBlockPage = (BlockPage.BlockPage === "undefined" || BlockPage.BlockPage === "")
+    useCustomBlockPage = (BlockPage.BlockPage !== "undefined" && BlockPage.BlockPage !== "")
     redirect = useDefaultBlockPage ? { extensionPath: `/blocked.html?user=${assigned_user}` } : { url: BlockPage.BlockPage }
+    condition = {
+      urlFilter: "*://*/*",
+      resourceTypes: [
+        "main_frame"
+      ]
+    }
+    if (useCustomBlockPage) {
+      condition.excludedRequestDomains = (new URL(BlockPage.BlockPage)).hostname
+    }
     rules.push({
       id: blockRuleID,
       priority: 1,
@@ -155,38 +164,15 @@ function applyBlockingRule(assigned_user) {
         type: 'redirect',
         redirect: redirect
       },
-      condition: {
-        urlFilter: "*://*/*",
-        resourceTypes: [
-          "main_frame"
-        ]
-      }
+      condition: condition
     })
-    if (!useDefaultBlockPage) {
-      rules.push({
-        id: customBlockPageRuleID,
-        priority: 2,
-        action: {
-          type: 'allow',
-        },
-        condition: {
-          urlFilter: redirect.url,
-          resourceTypes: [
-            "main_frame"
-          ]
-        }
-      });
-    }
 
-    chrome.declarativeNetRequest.updateSessionRules({
-      addRules: rules
-    }, () => { console.log("block rule applied") });
+    chrome.declarativeNetRequest.updateSessionRules({ addRules: rules }, () => { console.log("block rule applied") });
   })
 }
 
 function removeAllCustomRules() {
   removeCustomRule(blockRuleID)
-  removeCustomRule(customBlockPageRuleID)
 }
 
 function removeCustomRule(id) {
