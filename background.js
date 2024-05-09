@@ -155,7 +155,9 @@ function applyBlockingRule(assigned_user) {
       ]
     }
     if (useCustomBlockPage) {
-      condition.excludedRequestDomains = (new URL(BlockPage.BlockPage)).hostname
+      excludedRequestDomains = []
+      excludedRequestDomains.push((new URL(BlockPage.BlockPage)).hostname)
+      condition.excludedRequestDomains = excludedRequestDomains
     }
     rules.push({
       id: blockRuleID,
