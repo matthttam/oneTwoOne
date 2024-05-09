@@ -6,7 +6,7 @@
   "icons": {
     "128": "lib/media/icons/icon128.png"
   },
-  "version": "3.0.3",
+  "version": "3.0.4",
   "background": {
     "service_worker": "background.js"
   },
@@ -15,6 +15,7 @@
     "managed_schema": "schema.json"
   },
   "permissions": [
+    "identity",
     "identity.email",
     "enterprise.deviceAttributes",
     "webRequest",
