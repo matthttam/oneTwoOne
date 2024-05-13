@@ -4,9 +4,7 @@ A simple extension to prevent students from using other 1:1 Chromebooks
 Special thanks to jay0lee for the original application, which served as the basis for my forked version. You can find the original code at https://github.com/jay0lee/oneTwoOne/. I'm grateful for their contributions to the open-source community!
 
 # Deployment Guide
-__WARNING__: We have been using this extension for years now and it works great. This latest version provides configuration options from the Google Admin console that allow customizations regarding some blocking features. This extension will be published as a full Chrome Web Store extension soon and it is recommended to deploy from there instead of from our own repository.
-
-If you want to deploy using our repository or your own use tag 3.0.0 which was the final release before converting to a public chrome extension.
+__WARNING__: We have been using this extension for years now and it works great. This latest version provides configuration options from the Google Admin console that allow customizations regarding some blocking features. This extension is published as a full Chrome Web Store extension and deployment from our local repository is no longer supported.
 
 ### Populate the location attribute of Chrome devices with comma separated list of allowed user logins.
 
@@ -33,14 +31,14 @@ Location: 4th grade lab rm122,*
 if Location is empty, the device is unmanaged, the device is managed by another G Suite instance or the extension is running on a non-Chrome OS platform (Windows/Mac/Linux) then the extension should allow regular access.
 
 ### Force the extension to students who should be locked down
-__WARNING__: It is recommended to install this extension from the Chrome Web Store. Manual deployemnt from our custom repository is not guaranteed to work or be on the latest version.
+__WARNING__: It is recommended to install this extension from the Chrome Web Store.
 
-If teachers don't get the extension, they'll be able to login to any device.
+
 1. admin.google.com > 3 bar menu at top left > Devices > Chrome management > Apps & extensions
-1. Choose student testing OU to the left.
+1. Choose student OU to the left. Be sure not to include staff/teachers. Anyone who does not get the extension will be able to sign in to any device.
 1. Yellow + circle at bottom right > yellow "chrome" icon with tooltip "Add from Chrome Web Store".
-1. Search for OneTwoOne or past the following ID in the View app by ID section ```jnanjcpghahljpllmojibnjehekidnnk```
-1. Click save. Now in the list of extensions change ```jnanjcpghahljpllmojibnjehekidnnk``` from "Allow install" to "Force install". Click save at top right.
+1. Search for OneTwoOne or past the following ID in the View app by ID section ```djkcpblgmmdnielnpleekpaliebjhdgc```
+1. Click save. Now in the list of extensions change ```djkcpblgmmdnielnpleekpaliebjhdgc``` from "Allow install" to "Force install". Click save at top right.
 
 To use the hosted version (not recommended):  
 1. admin.google.com > 3 bar menu at top left > Devices > Chrome management > Apps & extensions
@@ -68,7 +66,7 @@ Modify the extension configuration under the "Policy for extensions" section in 
 If no configuration is provided or the above configuration is used, a built-in block page is presented that tells the user who the assigned user is and the user must match the assigned user (location field) or they will be blocked form all pages.
 
 You can customize this behaivor in the following ways:  
-__BlockPage__: Provide a full URL (e.g. _https://www.google.com/search?q=oneTwoOne+Extension_) and the user will be redirected to this webpage. Note they can navivate all of this webpage and subdomains if they choose to do so. A Search Param of user=*assigned user* will be added to the cusotm block page for your use.  
+__BlockPage__: Provide a full URL (e.g. _https://www.google.com/search?q=oneTwoOne+Extension_) and the user will be redirected to this webpage. Note they can navigate all of this webpage and subdomains if they choose to do so. A Search Param of user=*assigned user* will be added to the cusotm block page for your use.  
 __UnblockPatterns__: Provide a list of regular expressions. If the assigned user matches any of these expressions nothing will be blocked. This is useful if you want students to be able to use a staff assigned device.
 
 #### Example
